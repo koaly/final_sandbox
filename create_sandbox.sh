@@ -35,4 +35,4 @@ mkdir $sandbox_name/home
 mkdir $user_dir
 cp -avr $dir $user_dir
 sudo chown -R $user $user_dir
-sudo cp -avr /{bin,dev,etc,lib,lib64,run,sbin,usr} $sandbox_name
+sudo cp -avrn /{bin,dev,etc,lib,lib64,run,sbin,usr} $sandbox_name
