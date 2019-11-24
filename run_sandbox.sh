@@ -3,7 +3,8 @@
 user="--userspec=app"
 
 cpu_period="-r cpu.cfs_period_us=100000"
-cpu_quota="-r cpu.cfs_quota_us=100000"
+cpu_quota="-r cpu.cfs_quota_us=10000"
+memory="-r memory.limit_in_bytes=1G"
 
 cgroup_dir=$$
 
@@ -45,6 +46,17 @@ while :; do
 		--cpu_quota=?*)
             cpu_quota="-r cpu.cfs_quota_us=${1#*=}"
         ;;
+		--memory)
+            if [ "$2" ]; then
+                memory="-r memory.limit_in_bytes=$2"
+                shift
+            else
+                die 'ERROR: "--memory" requires a non-empty option argument.'
+            fi
+        ;;
+		--memory=?*)
+            memory="-r memory.limit_in_bytes=${1#*=}"
+        ;;
 		--)
 	    	shift
 			dir=$1
@@ -62,14 +74,18 @@ for arg in $@; do
 	option+="${arg} "
 done
 
-printf "Argument network is %s\n" "$network"
-printf "Argument dir is %s\n" "$dir"
-printf "Argument user is %s\n" "$user"
-printf "Argument option is %s\n" "$option"
+echo "****Please remember PID for sandbox monitoring.****"
+echo "Sandbox's PID is "$BASHPID
+echo "[Press any key to continue]"
+
+# printf "Argument network is %s\n" "$network"
+# printf "Argument dir is %s\n" "$dir"
+# printf "Argument user is %s\n" "$user"
+# printf "Argument option is %s\n" "$option"
 
 sudo unshare $network --mount --fork bash -c "
 	cgcreate -g cpu,memory,blkio,devices,freezer:/sandbox/$cgroup_dir
-	cgset $cpu_period $cpu_quota sandbox/$cgroup_dir
+	cgset $cpu_period $cpu_quota $memory sandbox/$cgroup_dir
 	cgexec -g cpu,memory,blkio,devices,freezer:/sandbox/$cgroup_dir \
 	chroot $user $dir $option
 "
