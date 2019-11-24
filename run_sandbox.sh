@@ -77,6 +77,7 @@ done
 echo "****Please remember PID for sandbox monitoring.****"
 echo "Sandbox's PID is "$BASHPID
 echo "[Press any key to continue]"
+read
 
 # printf "Argument network is %s\n" "$network"
 # printf "Argument dir is %s\n" "$dir"
