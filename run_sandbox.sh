@@ -1,12 +1,12 @@
 #!/bin/bash
 
-user="app"
+user=$USER
 
 io_read="1048576"
 io_write="1048576"
-cpu_period="100000"
-cpu_quota="10000"
-memory="1G"
+cpu_period="1000000"
+cpu_quota="100000"
+memory="2G"
 
 cgroup_dir=$$
 
@@ -143,20 +143,21 @@ for arg in $@; do
 	option+="${arg} "
 done
 
-sandbox_ip=$((($$-1)/256)).$((($$-1)%256))
+sandbox_ip=192.168.$((($$-1)*2/256)).$((($$-1)*2%256))
+sandbox_ip_in=192.168.$((($$-1)*2/256)).$((((($$-1)*2%256))+1))
 sudo ip netns add sandbox$$
 sudo ip netns exec sandbox$$ ip addr add 127.0.0.1/8 dev lo
 sudo ip netns exec sandbox$$ ip link set lo up
 sudo ip link add veth$$ type veth peer name veth$$-in
 sudo ip link set veth$$ up
 sudo ip link set veth$$-in netns sandbox$$ up
-sudo ip addr add 100.$sandbox_ip.1/30 dev veth$$
-sudo ip netns exec sandbox$$ ip addr add 100.$sandbox_ip.2/30 dev veth$$-in
-sudo ip netns exec sandbox$$ ip route add default via 100.$sandbox_ip.1 dev veth$$-in
+sudo ip addr add $sandbox_ip/31 dev veth$$
+sudo ip netns exec sandbox$$ ip addr add $sandbox_ip_in/31 dev veth$$-in
+sudo ip netns exec sandbox$$ ip route add default via $sandbox_ip dev veth$$-in
 
 echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
 ext_if=$(ip route get 8.8.8.8 | grep 'dev' | awk '{ print $5 }')
-sudo iptables -I POSTROUTING -t nat -s 100.$sandbox_ip.2/32 -o ${ext_if} -j MASQUERADE
+sudo iptables -I POSTROUTING -t nat -s $sandbox_ip_in/32 -o ${ext_if} -j MASQUERADE
 sudo iptables -I FORWARD -i veth$$ -o ${ext_if} -j ACCEPT
 sudo iptables -I FORWARD -i ${ext_if} -o veth$$ -j ACCEPT
 sudo mkdir -p /etc/netns/sandbox$$
