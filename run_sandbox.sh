@@ -136,6 +136,7 @@ fi
 
 if [ "$memory" ]; then
 	memory_t="-r memory.limit_in_bytes=$memory"
+#	memory_swp_t="-r memory.memsw.limit_in_bytes=$memory"
 fi
 
 option=""
@@ -190,6 +191,7 @@ read
 
 sudo cgcreate -g cpu,memory,blkio:/sandbox/$cgroup_dir
 sudo cgset $cpu_period_t $cpu_quota_t $memory_t sandbox/$cgroup_dir
+#sudo sh -c "echo $memory > /sys/fs/cgroup/memory/sandbox/$cgroup_dir/memory.memsw.limit_in_bytes"
 
 if [ "$disable_network" ]; then
 	if [ "$unlimit_io" ]; then

@@ -42,7 +42,7 @@ case $mode in
             echo "memory=$REPLY" >> $loc
         fi
         read -p "Limit (ALL) Block I/O [Y|n]: "
-        if [ $REPLY == "Y" ]; then
+        if [ $REPLY == "n" ]; then
             echo "unlimit_io=true" >> $loc
         else
             read -p "Enter Read I/O Rate (bps) <DEFAULT: 1048576>: "
@@ -81,4 +81,6 @@ case $mode in
     *) echo "Invalid option \"$mode\"" >&2
     ;;
 esac
+
+echo "Complete."
 

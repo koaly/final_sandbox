@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sleep_time=30
+sleep_time=5
 tree=0
 
 while :; do
